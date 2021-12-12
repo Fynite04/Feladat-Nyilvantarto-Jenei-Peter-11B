@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FeladatNyilvantarto"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Feladatok nyilvántartása Jenei Péter" Height="420" Width="620">
     <Grid>
-
+        <Label Content="Feladatok listája" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Feladatok szövege" HorizontalAlignment="Left" Margin="422,10,0,0" VerticalAlignment="Top" Width="168"/>
+        <TextBox x:Name="feladatSzovegInput" HorizontalAlignment="Left" Margin="422,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="168"/>
+        <Button x:Name="ujHozzadasaBtn" Content="Új hozzáadása" HorizontalAlignment="Left" Margin="422,64,0,0" VerticalAlignment="Top" Width="168" Click="ujHozzadasaBtn_Click"/>
+        <Button Content="Kijelölt feladat módosítása" HorizontalAlignment="Left" Margin="422,89,0,0" VerticalAlignment="Top" Width="168"/>
+        <Button Content="Kijelölt feladat törlése" HorizontalAlignment="Left" Margin="422,114,0,0" VerticalAlignment="Top" Width="168"/>
+        <Label Content="Törölt elemek" HorizontalAlignment="Left" Margin="10,217,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="kijeloltFelVisszaBtn" Content="Kijelölt feladat visszaállít" HorizontalAlignment="Left" Margin="422,243,0,0" VerticalAlignment="Top" Width="168"/>
+        <Button x:Name="kijeloltFelVeglegTorleseBtn" Content="Kijelölt feladat végleg törlése" HorizontalAlignment="Left" Margin="422,268,0,0" VerticalAlignment="Top" Width="168"/>
+        <Label Content="Jenei Péter @ 2021" HorizontalAlignment="Left" Margin="476,348,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="feladatokListaLBx" Margin="10,41,205,187"/>
+        <ListBox x:Name="toroltElemekLBx" Margin="10,243,205,30"/>
     </Grid>
 </Window>
