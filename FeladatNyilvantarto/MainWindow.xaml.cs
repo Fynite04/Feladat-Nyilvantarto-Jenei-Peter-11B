@@ -31,8 +31,11 @@ namespace FeladatNyilvantarto
         {
             InitializeComponent();
             AdatfajlKezeles();
+            CheckboxKezelo();
         }
 
+        // Adatfájlok létrehozása amennyiben nem léteznek
+        // Ha igen, akkor azok alapján a ListBoxok feltöltése
         private void AdatfajlKezeles()
         {
             if (File.Exists("feladatok.dat"))
@@ -56,6 +59,7 @@ namespace FeladatNyilvantarto
             }
         }
 
+        // Checkbox lista feltöltése / frissítése az adatfájl használatával
         private void CbListaFeltoltes(List<CheckBox> lista, string adatFajl)
         {
             List<string> felSorok = File.ReadAllLines(adatFajl).ToList();
@@ -72,10 +76,11 @@ namespace FeladatNyilvantarto
             }
         }
 
+        // ListBoxok (feladatokListaLBx, toroltElemekLBx) feltöltése / frissítése,
+        // a bennük lévő checkboxokhoz események hozzárendelése
         private void ListBoxokFeltoltese()
         {
             // Feladatok ListBox feltöltése
-
             feladatokListaLBx.Items.Clear();
             for (int i = 0; i < feladatokLista.Count; i++)
             {
@@ -94,8 +99,8 @@ namespace FeladatNyilvantarto
             }
         }
 
-        // A feladatSzovegInput-ba beírt szöveg hozzáadása a
-        // feladatokListaLBx ListBox-hoz CheckBox-ként
+        // A feladatSzovegInput-ba beírt szöveg hozzáadása a feladatok
+        // ListBox-hoz Checkbox-ként, adatfájl szerkesztése ez alapján
         private void ujHozzadasaBtn_Click(object sender, RoutedEventArgs e)
         {
             string ujFeladatSzoveg = feladatSzovegInput.Text;
@@ -111,9 +116,17 @@ namespace FeladatNyilvantarto
             feladatSzovegInput.Clear();
         }
 
-        // Checkboxok szövegének kezelése a checkbox állapotától függően
+        // Checkboxok állapotának (ki van e pipálva) változásakor jön működésbe
         private void CheckBox_EventHandler(object sender, RoutedEventArgs e)
         {
+            CheckboxKezelo();
+        }
+
+        // Checkboxok szövegének kezelése az állapotuktól függően, az adatfájlok
+        // szerkesztése ezek alapján
+        private void CheckboxKezelo()
+        {
+            // Feladatok ListBox
             int index = 0;
             foreach (CheckBox cb in feladatokListaLBx.Items)
             {
@@ -131,20 +144,43 @@ namespace FeladatNyilvantarto
                 }
                 index++;
             }
+
+            // Törölt feladatok ListBox
+            index = 0;
+            foreach (CheckBox cb in toroltElemekLBx.Items)
+            {
+                if (cb.IsChecked == true)
+                {
+                    cb.FontStyle = FontStyles.Italic;
+                    cb.Foreground = Brushes.Gray;
+                    FajlSzerkesztesAdottSorban("toroltFeladatok.dat", $"{toroltFelLista[index].Content.ToString()}|1", index);
+                }
+                else
+                {
+                    cb.FontStyle = FontStyles.Normal;
+                    cb.Foreground = Brushes.Black;
+                    FajlSzerkesztesAdottSorban("toroltFeladatok.dat", $"{toroltFelLista[index].Content.ToString()}|0", index);
+                }
+                index++;
+            }
         }
 
+        // Szövegfájlok szerkesztése egy megadott sorban; az adatfájlok szerkesztése
+        // a checkboxok állapota alapján (be: 1, ki: 0)
         private void FajlSzerkesztesAdottSorban(string fajlNev, string ujSzoveg, int sor)
         {
             List<string> sorokList = File.ReadAllLines(fajlNev).ToList();
-            sorokList.RemoveAll(s => s == "");
+            sorokList.RemoveAll(s => s == "");              // A File.WriteAllLines által létrehozott üres sorok törlése
             sorokList[sor] = ujSzoveg;
             File.WriteAllLines(fajlNev, sorokList);
         }
 
+        // A kijelölt feladat törlése (áthelyezés a feladat ListBoxból a törölt
+        // feladatok ListBoxba) a gomb megnyomásakor
         private void feladatTorles_Click(object sender, RoutedEventArgs e)
         {
-            //if (feladatokListaLBx.SelectedItem == null)
-            //    return;
+            if (feladatokListaLBx.SelectedItem == null)
+                return;
 
             string felNev = "";
             int isChecked = 0;
@@ -163,11 +199,13 @@ namespace FeladatNyilvantarto
             toroltFelLista.RemoveAll(s => s == "");
             File.WriteAllLines("toroltFeladatok.dat", toroltFelLista);
 
-            CbListaFeltoltes(this.feladatokLista, "feladatok.dat");             // Feladatok lista elemeinek frissítése
-            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat");       // Törölt feladatok lista elemeinek frissítése
-            ListBoxokFeltoltese();                                              // Feladatok ListBox elemeinek frissítése
+            CbListaFeltoltes(this.feladatokLista, "feladatok.dat");
+            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat");
+            ListBoxokFeltoltese();
+            CheckboxKezelo();
         }
 
+        // A feladatok ListBoxban kijelölt elemek figyelése
         private void feladatokListaLBx_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (feladatokListaLBx.SelectedItem != null)
@@ -176,11 +214,12 @@ namespace FeladatNyilvantarto
                 kijeloltELem = kijeloltELem.Remove(0, 41);
                 kijeloltELem = kijeloltELem.Remove(kijeloltELem.IndexOf(" IsChecked:"));
 
-                feladatSzovegInput.Text = kijeloltELem;
+                feladatSzovegInput.Text = kijeloltELem;         // A kijelölt elemek megjelenítése a beviteli mezőben
                 kijeloltFeladat = kijeloltELem;
             }
         }
 
+        // A kijelölt feladat tartalmának módosítása a beviteli mezőn beírt szöveg alapján
         private void feladatModositas_Click(object sender, RoutedEventArgs e)
         {
             List<string> felList = File.ReadAllLines("feladatok.dat").ToList();
@@ -197,8 +236,10 @@ namespace FeladatNyilvantarto
 
             CbListaFeltoltes(feladatokLista, "feladatok.dat");
             ListBoxokFeltoltese();
+            CheckboxKezelo();
         }
 
+        // A törölt feladatok ListBoxban kijelölt elemek figyelése
         private void toroltElemekLBx_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (toroltElemekLBx.SelectedItem != null)
@@ -211,10 +252,11 @@ namespace FeladatNyilvantarto
             }
         }
 
+        // A kijelölt törölt feladat visszaállítása a feladatok közé a gomb megnyomásakor
         private void kijeloltFelVisszaBtn_Click(object sender, RoutedEventArgs e)
         {
-            //if (toroltElemekLBx.SelectedItem == null)
-            //    return;
+            if (toroltElemekLBx.SelectedItem == null)
+                return;
 
             string felNev = "";
             int isChecked = 0;
@@ -233,18 +275,27 @@ namespace FeladatNyilvantarto
             sorok.RemoveAll(s => s == "");
             File.WriteAllLines("feladatok.dat", sorok);
 
-            CbListaFeltoltes(this.feladatokLista, "feladatok.dat");             // Feladatok lista elemeinek frissítése
-            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat");       // Törölt feladatok lista elemeinek frissítése
+            CbListaFeltoltes(this.feladatokLista, "feladatok.dat");
+            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat");
             ListBoxokFeltoltese();
+            CheckboxKezelo();
         }
 
+        // A kijelölt törölt feladatok végleges törlése a gomb megnyomásakor
         private void kijeloltFelVeglegTorleseBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (toroltElemekLBx.SelectedItem == null)
+                return;
+
             List<string> toroltFelLista = File.ReadAllLines("toroltFeladatok.dat").ToList();
             toroltFelLista.RemoveAll(f => f.StartsWith(kijeloltToroltFel + "|"));
             File.WriteAllLines("toroltFeladatok.dat", toroltFelLista);
 
-            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat"); 
+            CbListaFeltoltes(this.toroltFelLista, "toroltFeladatok.dat");
+            ListBoxokFeltoltese();
+            CheckboxKezelo();
         }
+
+        
     }
 }
